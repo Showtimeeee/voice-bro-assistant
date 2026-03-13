@@ -1,0 +1,3 @@
+VOSK_MODEL_PATH = "model"
+RATE = 150
+VOLUME = 1.0
