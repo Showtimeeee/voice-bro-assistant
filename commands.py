@@ -67,7 +67,7 @@ class CommandProcessor:
                 
         return "Не совсем поняла команду"
 
-    # Обработка приветствий (моки)
+    # Обработка приветствий
     def handle_greeting(self, command):
         greetings = [
             "Здравствуйте!",
@@ -78,7 +78,7 @@ class CommandProcessor:
         ]
         return random.choice(greetings)
 
-    # Обработка прощаний (моки)
+    # Обработка прощаний
     def handle_farewell(self, command):
         farewells = [
             "До свидания!",
@@ -106,7 +106,6 @@ class CommandProcessor:
             return f"Сейчас в Москве {temp}°C, {description}"
         except Exception as e:
             return "Не удалось получить данные о погоде"
-        
         
         
      # Новости
@@ -141,3 +140,61 @@ class CommandProcessor:
             return "Произошла ошибка при загрузке новостей"
         except Exception as e:
             return f"Не удалось получить новости: {str(e)}"
+
+
+    # Калькулятор
+    def calculate(self, command):
+        try:
+            expression = command.replace("посчитай", "").replace("калькулятор", "").strip()
+            result = eval(expression)
+            return f"Результат: {result}"
+        except Exception:
+            return "Некорректное математическое выражение"
+
+    # Анекдоты (моки)
+    def tell_joke(self, command):
+        jokes = [
+            "Почему программист не пошел на вечеринку? Потому что он не смог найти подходящий URL!",
+            "Почему компьютер пошел к врачу? У него был вирус!",
+            "Как программист назвал свою кошку? Ctrl+Alt+Meow!"
+        ]
+        return random.choice(jokes)
+
+    # Перевод (моки)
+    def translate(self, command):
+        try:
+            text_to_translate = command.replace("переведи", "").strip()
+            return f"Перевод: {text_to_translate}"
+        except Exception:
+            return "Ошибка при переводе"
+
+    # Музыка (моки)
+    def play_music(self, command):
+        return "Функция воспроизведения музыки 1"
+
+    # Поиск
+    def search(self, command):
+        try:
+            query = command.replace("найди", "").strip()
+            return f"Ищу информацию по запросу: {query}"
+        except Exception:
+            return "Ошибка при поиске"
+
+    # Помощь
+    def show_help(self, command):
+        help_text = (
+            "Я могу помочь с:\n"
+            "- Погодной информацией\n"
+            "- Новыми новостями\n"
+            "- Временем\n"
+            "- Напоминаниями\n"
+            "- Записками\n"
+            "- Математическими вычислениями\n"
+            "- Анекдоты\n"
+            "- Переводами\n"
+            "- Воспроизведением музыки\n"
+            "- Поиском информации\n"
+            "- Получением мемов\n"
+            "Просто скажите команду, и я постараюсь помочь!"
+        )
+        return help_text
