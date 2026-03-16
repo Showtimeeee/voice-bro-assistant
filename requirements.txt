@@ -9,6 +9,7 @@ pillow==12.1.1
 PyAudio==0.2.14
 pycparser==3.0
 pypiwin32==223
+python-dotenv==1.2.2
 pyttsx3==2.99
 pytz==2026.1.post1
 pywin32==311
