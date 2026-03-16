@@ -1,50 +1,57 @@
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-VOSK_MODEL_PATH = os.path.join(BASE_DIR, 'vosk-model-small-ru-0.22')
-RATE = 150  # Скорость речи
-VOLUME = 1.0  # Громкость
+VOSK_MODEL_PATH = os.path.join(
+    BASE_DIR, 
+    os.getenv('VOSK_MODEL_DIR', 'vosk-model-small-ru-0.22'))
+RATE = int(os.getenv('SPEECH_RATE', 150))  # Скорость речи
+VOLUME = float(os.getenv('VOLUME_LEVEL', 1.0))  # Громкость
 
-# Настройки API ключей
+# API ключи из .env
 API_KEYS = {
-    'weather': 'ВАШ_КЛЮЧ_ОТ_OPENWEATHERMAP',  # Замените на ваш реальный ключ
-    'news': 'ВАШ_КЛЮЧ_ОТ_NEWSAPI',            # Замените на ваш реальный ключ
+    'weather': os.getenv('OPENWEATHERMAP_KEY'),
+    'news': os.getenv('NEWSAPI_KEY')
 }
 
 # Основные настройки приложения
 SETTINGS = {
-    'language': 'ru',                         # Язык интерфейса
-    'timezone': 'Europe/Moscow',              # Часовой пояс
-    'default_city': 'Москва',                 # Город по умолчанию для погоды
-    'speech_rate': 150,                       # Скорость речи
-    'volume_level': 1.0                       # Уровень громкости
+    'language': os.getenv('APP_LANGUAGE', 'ru'),
+    'timezone': os.getenv('TIMEZONE', 'Europe/Moscow'),
+    'default_city': os.getenv('DEFAULT_CITY', 'Москва'),
+    'speech_rate': RATE,
+    'volume_level': VOLUME
 }
 
-# Пути к файлам и директориям
+# Пути к файлам
 FILE_PATHS = {
-    'notes': 'notes.txt',                     # Файл для хранения заметок
-    'reminders': 'reminders.txt',             # Файл для напоминаний
-    'vosk_model': 'vosk-model-small-ru-0.22'  # Модель для распознавания речи
+    'notes': os.getenv('NOTES_FILE', 'notes.txt'),
+    'reminders': os.getenv('REMINDERS_FILE', 'reminders.txt'),
+    'vosk_model': VOSK_MODEL_PATH
 }
 
-# Настройки подключения к базе данных (если используется)
+# Настройки БД
 DATABASE = {
-    'host': 'localhost',
-    'port': 5432,
-    'user': 'your_user',
-    'password': 'your_password',
-    'database': 'your_database'
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', 5432)),
+    'user': os.getenv('DB_USER', 'your_user'),
+    'password': os.getenv('DB_PASSWORD', 'your_password'),
+    'database': os.getenv('DB_NAME', 'your_database')
 }
 
-# Настройки логирования (опционально)
+# Логирование
 LOGGING = {
-    'log_file': 'app.log',
-    'level': 'INFO'
+    'log_file': os.getenv('LOG_FILE', 'app.log'),
+    'level': os.getenv('LOG_LEVEL', 'INFO')
 }
 
-# Настройки уведомлений (опционально)
+# Уведомления
 NOTIFICATIONS = {
-    'enabled': True,
-    'method': 'email',  # или 'push', 'sms'
-    'email': 'your@email.com'
+    'enabled': os.getenv('NOTIFICATIONS_ENABLED', 'True').lower() in ['true', '1', 'yes'],
+    'method': os.getenv('NOTIFICATION_METHOD', 'email'),
+    'email': os.getenv('NOTIFICATION_EMAIL', 'your@email.com')
 }
