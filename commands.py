@@ -3,11 +3,7 @@ import requests
 import pytz
 import random
 from config import API_KEYS
-from notes import NotesManager
-from reminders import ReminderManager
-import os
-from PIL import Image
-import urllib.request
+from notes import NotesManager, ReminderManager
 
 
 class CommandProcessor:
@@ -18,7 +14,6 @@ class CommandProcessor:
         self.notes = NotesManager()
         self.reminders = ReminderManager()
         
-        # Словарь команд
         self.commands = {
             'greeting': self.handle_greeting,
             'farewell': self.handle_farewell,
@@ -35,10 +30,8 @@ class CommandProcessor:
             'search': self.search,
             'how_are_you': self.handle_how_are_you,
             'help': self.show_help,
-            'meme': self.show_meme
         }
         
-        # Ключевые слова
         self.keywords = {
             'greeting': ['привет', 'добрый день', 'здравствуйте'],
             'farewell': ['пока', 'до свидания'],
@@ -55,7 +48,6 @@ class CommandProcessor:
             'search': ['поиск', 'найди'],
             'how_are_you': ['как дела', 'как поживаешь'],
             'help': ['помощь', 'что умеешь'],
-            'meme': ['пришли мем', 'покажи мем', 'мем']
         }
 
     def process(self, command):
@@ -194,10 +186,13 @@ class CommandProcessor:
             "- Переводами\n"
             "- Воспроизведением музыки\n"
             "- Поиском информации\n"
-            "- Получением мемов\n"
             "Просто скажите команду, и я постараюсь помочь!"
         )
         return help_text
+
+    def handle_how_are_you(self, command):
+        replies = ["Всё отлично!", "Работаю в штатном режиме", "Лучше всех, спасибо!"]
+        return random.choice(replies)
 
     # Заметки 
     def add_note(self, command):
