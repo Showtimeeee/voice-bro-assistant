@@ -8,10 +8,13 @@ def main():
     stt = SpeechToText()
     commands = CommandProcessor()
 
-    print("Голосовой помощник запущен. Говорите...")
+    print("Голосовой помощник запущен. Скажите 'бро' для активации.")
 
-    while True:
-        try:
+    try:
+        while True:
+            stt.wait_for_wake_word("бро")
+            print("Слушаю команду...")
+
             user_input = stt.listen()
             if not user_input:
                 continue
@@ -22,11 +25,10 @@ def main():
 
             tts.speak(response)
 
-        except KeyboardInterrupt:
-            print("\nЗавершение работы...")
-            break
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+    except KeyboardInterrupt:
+        print("\nЗавершение работы...")
+    finally:
+        stt.close()
 
 
 if __name__ == "__main__":
