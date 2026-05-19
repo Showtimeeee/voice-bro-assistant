@@ -7,18 +7,27 @@ def main():
     tts = TextToSpeech()
     stt = SpeechToText()
     commands = CommandProcessor()
-    
-    print("Голосовой помощник запущен")
-    
+
+    print("Голосовой помощник запущен. Говорите...")
+
     while True:
         try:
             user_input = stt.listen()
+            if not user_input:
+                continue
+
             print(f"Вы сказали: {user_input}")
             response = commands.process(user_input)
+            print(f"Ответ: {response}")
+
             tts.speak(response)
-            
+
+        except KeyboardInterrupt:
+            print("\nЗавершение работы...")
+            break
         except Exception as e:
             print(f"Произошла ошибка: {e}")
+
 
 if __name__ == "__main__":
     main()
