@@ -11,11 +11,8 @@ class SpeechToText:
         self.FORMAT = pyaudio.paInt16
         self.CHANNELS = 1
         self.RATE = 16000
-
-    def listen(self):
-        rec = vosk.KaldiRecognizer(self.model, self.RATE)
-        p = pyaudio.PyAudio()
-        stream = p.open(
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(
             format=self.FORMAT,
             channels=self.CHANNELS,
             rate=self.RATE,
@@ -23,15 +20,27 @@ class SpeechToText:
             frames_per_buffer=self.CHUNK,
         )
 
-        try:
-            while True:
-                data = stream.read(self.CHUNK, exception_on_overflow=False)
-                if rec.AcceptWaveform(data):
-                    result = json.loads(rec.Result())
-                    text = result.get("text", "")
-                    if text:
-                        return text
-        finally:
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
+    def close(self):
+        self.stream.stop_stream()
+        self.stream.close()
+        self.p.terminate()
+
+    def wait_for_wake_word(self, wake_word="бро"):
+        rec = vosk.KaldiRecognizer(self.model, self.RATE)
+        rec.SetKeywords([wake_word])
+
+        while True:
+            data = self.stream.read(self.CHUNK, exception_on_overflow=False)
+            if rec.AcceptWaveform(data):
+                return
+
+    def listen(self):
+        rec = vosk.KaldiRecognizer(self.model, self.RATE)
+
+        while True:
+            data = self.stream.read(self.CHUNK, exception_on_overflow=False)
+            if rec.AcceptWaveform(data):
+                result = json.loads(rec.Result())
+                text = result.get("text", "")
+                if text:
+                    return text
