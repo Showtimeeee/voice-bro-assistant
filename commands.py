@@ -4,6 +4,7 @@ import pytz
 import random
 from config import API_KEYS
 from notes import NotesManager, ReminderManager
+from duckduckgo_search import DDGS
 
 
 class CommandProcessor:
@@ -168,9 +169,30 @@ class CommandProcessor:
     def search(self, command):
         try:
             query = command.replace("найди", "").strip()
-            return f"Ищу информацию по запросу: {query}"
-        except Exception:
-            return "Ошибка при поиске"
+            if not query:
+                return "Что вы хотите найти?"
+
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=2))
+
+            if not results:
+                return f"Ничего не нашёл по запросу '{query}'."
+
+            parts = [f"Вот что нашёл по запросу '{query}'."]
+            for r in results:
+                title = r.get("title", "")
+                body = r.get("body", "")
+                snippet = body[:300] if body else ""
+                if title and snippet:
+                    parts.append(f"{title}: {snippet}")
+                elif title:
+                    parts.append(title)
+
+            return " ".join(parts)
+        except ImportError:
+            return "Модуль поиска не установлен. Выполните: pip install duckduckgo-search"
+        except Exception as e:
+            return f"Не удалось выполнить поиск: {str(e)}"
 
     # Помощь
     def show_help(self, command):
