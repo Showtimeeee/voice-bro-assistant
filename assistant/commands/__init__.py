@@ -1,5 +1,6 @@
 import pytz
 from ..config import API_KEYS
+from ..log import logger
 from ..notes import NotesManager, ReminderManager
 from .general import GeneralCommands
 from .info import InfoCommands
@@ -58,4 +59,5 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
             if any(keyword in command for keyword in keywords):
                 return self.commands[cmd_type](command)
 
+        logger.warning(f"Неизвестная команда: {command}")
         return "Не совсем поняла команду"
