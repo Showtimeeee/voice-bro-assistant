@@ -93,10 +93,15 @@ class ToolCommands:
 
     def translate(self, command):
         try:
-            text_to_translate = command.replace("переведи", "").strip()
-            return f"Перевод: {text_to_translate}"
-        except Exception:
-            return "Ошибка при переводе"
+            text, target = self.translator.parse_command(command)
+            if not text:
+                return "Что перевести?"
+            result = self.translator.translate(text, target)
+            if result:
+                return f"Перевод: {result}"
+            return "Не удалось перевести. Возможно, не установлена языковая модель."
+        except Exception as e:
+            return f"Ошибка при переводе: {str(e)}"
 
     def play_music(self, command):
         return "Функция воспроизведения музыки 1"
