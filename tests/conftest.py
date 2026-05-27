@@ -3,10 +3,11 @@ import types
 import pytest
 from pathlib import Path
 
-# --- mock external modules before any assistant imports ---
+
 _MOCK_MODULES = [
     'vosk', 'pyaudio', 'pyttsx3', 'dotenv',
     'PIL', 'PIL.Image', 'duckduckgo_search', 'duckduckgo_search.DDGS',
+    'webrtcvad', 'yt_dlp',
 ]
 for name in _MOCK_MODULES:
     if name not in sys.modules:
@@ -86,6 +87,41 @@ class _MockArgos:
 sys.modules['argostranslate'] = _MockArgos()
 sys.modules['argostranslate.package'] = _MockArgos.package
 sys.modules['argostranslate.translate'] = _MockArgos.translate
+
+
+# mock dateparser
+# mock shutil.which so MusicPlayer sees ffplay as available
+import shutil as _shutil
+_shutil.which = lambda *a, **kw: "C:\\ffmpeg\\ffplay.exe"
+
+# mock yt_dlp.YoutubeDL
+class _MockYoutubeDL:
+    def __init__(self, *a, **kw):
+        pass
+    def __enter__(self):
+        return self
+    def __exit__(self, *a, **kw):
+        pass
+    def extract_info(self, *a, **kw):
+        return {
+            "entries": [{"url": "https://example.com/audio", "title": "Test Song"}]
+        }
+
+sys.modules["yt_dlp"].YoutubeDL = _MockYoutubeDL
+
+import datetime as _dt
+
+class _MockSearchDates:
+    def search_dates(self, text, **kw):
+        if "через" in text or "на " in text:
+            future = _dt.datetime.now() + _dt.timedelta(minutes=10)
+            return [('через 10 минут', future)]
+        return None
+
+_sd = _MockSearchDates()
+sys.modules['dateparser'] = types.ModuleType('dateparser')
+sys.modules['dateparser.search'] = types.ModuleType('dateparser.search')
+sys.modules['dateparser.search'].search_dates = _sd.search_dates
 
 
 @pytest.fixture(autouse=True)
