@@ -1,34 +1,71 @@
-from tts import TextToSpeech
-from stt import SpeechToText
-from commands import CommandProcessor
+import time
+from assistant.log import setup_logging, logger
+from assistant.tts import TextToSpeech
+from assistant.stt import SpeechToText
+from assistant.commands import CommandProcessor
+from assistant.vad import VoiceActivityDetector
+
+
+_VAD_FRAME = None
+
+def _get_vad_frame(rate: int) -> int:
+    global _VAD_FRAME
+    if _VAD_FRAME is None:
+        _VAD_FRAME = int(rate * 0.03)
+    return _VAD_FRAME
+
+
+def _wait_for_speech_or_end(tts, stt, vad):
+    """Monitor mic while TTS speaks. Return True if user interrupted."""
+    frame = _get_vad_frame(stt.RATE)
+    while tts.is_speaking():
+        data = stt.stream.read(frame, exception_on_overflow=False)
+        if vad.is_speech(data, stt.RATE):
+            tts.stop()
+            return True
+        time.sleep(0.001)
+    return False
+
+
+def _handle_command(stt, tts, commands, vad, source="бро"):
+    user_input = stt.listen()
+    if not user_input:
+        return False
+    logger.info(f"Команда ({source}): {user_input}")
+    response = commands.process(user_input)
+    logger.info(f"Ответ: {response}")
+    tts.speak(response)
+    return _wait_for_speech_or_end(tts, stt, vad)
 
 
 def main():
+    setup_logging()
+    logger.info("Голосовой помощник запущен")
+
     tts = TextToSpeech()
     stt = SpeechToText()
-    commands = CommandProcessor()
+    vad = VoiceActivityDetector()
+    commands = CommandProcessor(
+        reminder_callback=lambda text: tts.speak(f"Напоминание: {text}")
+    )
 
-    print("Голосовой помощник запущен. Скажите 'бро' для активации.")
+    print("Скажите 'бро' для активации.")
+    commands.reminders.start()
 
     try:
         while True:
             stt.wait_for_wake_word("бро")
-            print("Слушаю команду...")
-
-            user_input = stt.listen()
-            if not user_input:
-                continue
-
-            print(f"Вы сказали: {user_input}")
-            response = commands.process(user_input)
-            print(f"Ответ: {response}")
-
-            tts.speak(response)
+            while _handle_command(stt, tts, commands, vad, "бро"):
+                pass
 
     except KeyboardInterrupt:
-        print("\nЗавершение работы...")
+        logger.info("Завершение работы по запросу пользователя")
+    except Exception as e:
+        logger.exception("Необработанная ошибка")
     finally:
+        commands.reminders.stop()
         stt.close()
+        logger.info("Приложение остановлено")
 
 
 if __name__ == "__main__":
