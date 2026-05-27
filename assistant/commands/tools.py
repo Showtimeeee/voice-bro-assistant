@@ -104,4 +104,18 @@ class ToolCommands:
             return f"Ошибка при переводе: {str(e)}"
 
     def play_music(self, command):
-        return "Функция воспроизведения музыки 1"
+        triggers = ["включи музыку", "включи", "воспроизведи"]
+        query = ""
+        for t in triggers:
+            if t in command:
+                query = command.replace(t, "", 1).strip()
+                break
+        if not query:
+            return "Что включить?"
+        return self.music_player.play(query)
+
+    def stop_music(self, command):
+        if not self.music_player.is_playing():
+            return "Музыка не играет."
+        self.music_player.stop()
+        return "Музыка остановлена."
