@@ -5,7 +5,7 @@ import threading
 class TextToSpeech:
     def __init__(self):
         self.engine = pyttsx3.init()
-        self._lock = threading.Lock()
+        self._thread = None
         self.setup_voice()
 
     def setup_voice(self):
@@ -15,11 +15,22 @@ class TextToSpeech:
         self.engine.setProperty("rate", 150)
 
     def _speak(self, text):
-        with self._lock:
-            self.engine.say(text)
-            self.engine.runAndWait()
+        self.engine.say(text)
+        self.engine.runAndWait()
 
     def speak(self, text):
-        thread = threading.Thread(target=self._speak, args=(text,), daemon=True)
-        thread.start()
-        return thread
+        self._thread = threading.Thread(target=self._speak, args=(text,), daemon=True)
+        self._thread.start()
+        return self._thread
+
+    def is_speaking(self):
+        return self._thread is not None and self._thread.is_alive()
+
+    def get_rate(self):
+        return self.engine.getProperty("rate")
+
+    def set_rate(self, value):
+        self.engine.setProperty("rate", max(50, min(400, int(value))))
+
+    def stop(self):
+        self.engine.stop()
