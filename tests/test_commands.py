@@ -113,6 +113,42 @@ def test_music_no_query(processor):
     assert "Что включить" in result
 
 
+def test_speed_faster(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_rate.return_value = 150
+    processor.tts = mock_tts
+    result = processor.process("говори быстрее")
+    assert "Скорость речи: 160" in result
+    mock_tts.set_rate.assert_called_with(160)
+
+def test_speed_slower(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_rate.return_value = 150
+    processor.tts = mock_tts
+    result = processor.process("говори медленнее")
+    assert "Скорость речи: 140" in result
+    mock_tts.set_rate.assert_called_with(140)
+
+def test_speed_normal(processor, mocker):
+    mock_tts = mocker.Mock()
+    processor.tts = mock_tts
+    result = processor.process("нормальная скорость")
+    assert "Скорость речи: 150" in result
+    mock_tts.set_rate.assert_called_with(150)
+
+def test_speed_set_number(processor, mocker):
+    mock_tts = mocker.Mock()
+    processor.tts = mock_tts
+    result = processor.process("скорость речи 200")
+    assert "Скорость речи: 200" in result
+    mock_tts.set_rate.assert_called_with(200)
+
+def test_speed_no_tts(processor):
+    processor.tts = None
+    result = processor.process("говори быстрее")
+    assert "Ошибка" in result
+
+
 def test_unknown_command(processor):
     result = processor.process("фывапролд")
     assert "Не совсем поняла" in result
