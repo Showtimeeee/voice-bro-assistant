@@ -81,7 +81,36 @@ def test_show_notes(processor):
 
 def test_reminder(processor):
     result = processor.process("напомни позвонить")
+    assert "сохранено" in result or "установлено" in result
+
+def test_timed_reminder(processor):
+    result = processor.process("напомни через 10 минут выключить чайник")
     assert "установлено" in result
+
+
+def test_music(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    mock_proc = mocker.Mock()
+    mock_proc.poll.return_value = None
+    mock_popen.return_value = mock_proc
+
+    result = processor.process("включи Imagine Dragons")
+    assert "Воспроизвожу" in result
+    assert "Test Song" in result
+
+def test_stop_music(processor, mocker):
+    mocker.patch("subprocess.Popen")
+    mock_proc = mocker.Mock()
+    mock_proc.poll.return_value = None
+    mocker.patch("subprocess.Popen", return_value=mock_proc)
+
+    processor.process("включи Imagine Dragons")
+    result = processor.process("выключи музыку")
+    assert "остановлена" in result
+
+def test_music_no_query(processor):
+    result = processor.process("включи музыку")
+    assert "Что включить" in result
 
 
 def test_unknown_command(processor):
