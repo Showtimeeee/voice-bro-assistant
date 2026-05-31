@@ -9,6 +9,9 @@ class InfoCommands:
         return f"Сейчас {now.strftime('%H:%M')}"
 
     def get_weather(self, command):
+        cached = self.cache.get("weather", ttl=600)
+        if cached:
+            return cached
         try:
             response = requests.get(
                 f"http://api.openweathermap.org/data/2.5/weather?q=Москва&appid={self.weather_api_key}&units=metric&lang=ru"
@@ -16,11 +19,16 @@ class InfoCommands:
             data = response.json()
             temp = data['main']['temp']
             description = data['weather'][0]['description']
-            return f"Сейчас в Москве {temp}°C, {description}"
+            result = f"Сейчас в Москве {temp}°C, {description}"
+            self.cache.set("weather", result)
+            return result
         except Exception:
             return "Не удалось получить данные о погоде"
 
     def get_news(self, command):
+        cached = self.cache.get("news", ttl=1800)
+        if cached:
+            return cached
         try:
             response = requests.get(
                 f"https://newsapi.org/v2/top-headlines?"
@@ -45,6 +53,7 @@ class InfoCommands:
                 description = article.get('description', 'Нет описания')
                 news_list += f"{index}. {title}\n{description}\n\n"
 
+            self.cache.set("news", news_list)
             return news_list
         except requests.exceptions.RequestException:
             return "Произошла ошибка при загрузке новостей"
