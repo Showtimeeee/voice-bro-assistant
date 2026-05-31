@@ -5,7 +5,6 @@ colorama==0.4.6
 comtypes==1.4.16
 idna==3.11
 numpy==2.4.3
-pillow==12.1.1
 PyAudio==0.2.14
 pycparser==3.0
 pypiwin32==223
@@ -14,12 +13,12 @@ pyttsx3==2.99
 pytz==2026.1.post1
 pywin32==311
 requests==2.32.5
-SpeechRecognition==3.15.1
-srt==3.5.3
 tqdm==4.67.3
 typing_extensions==4.15.0
 urllib3==2.6.3
 vosk==0.3.45
-websockets==16.0
 duckduckgo_search==7.6.0
 argostranslate>=1.9
+dateparser>=1.2
+webrtcvad>=2.0
+yt-dlp>=2024.12
