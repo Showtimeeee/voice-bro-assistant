@@ -12,23 +12,32 @@ class InfoCommands:
         cached = self.cache.get("weather", ttl=600)
         if cached:
             return cached
+        if not self.weather_api_key:
+            return "Ключ OpenWeatherMap не настроен. Добавьте OPENWEATHERMAP_KEY в .env"
         try:
             response = requests.get(
                 f"http://api.openweathermap.org/data/2.5/weather?q=Москва&appid={self.weather_api_key}&units=metric&lang=ru"
             )
             data = response.json()
+            if response.status_code != 200:
+                msg = data.get("message", "неизвестная ошибка")
+                return f"Ошибка погоды ({response.status_code}): {msg}"
             temp = data['main']['temp']
-            description = data['weather'][0]['description']
-            result = f"Сейчас в Москве {temp}°C, {description}"
+            desc = data['weather'][0]['description']
+            result = f"Сейчас в Москве {temp}°C, {desc}"
             self.cache.set("weather", result)
             return result
-        except Exception:
-            return "Не удалось получить данные о погоде"
+        except requests.exceptions.RequestException as e:
+            return f"Ошибка сети при запросе погоды: {e}"
+        except Exception as e:
+            return f"Не удалось получить погоду: {e}"
 
     def get_news(self, command):
         cached = self.cache.get("news", ttl=1800)
         if cached:
             return cached
+        if not self.news_api_key:
+            return "Ключ NewsAPI не настроен. Добавьте NEWSAPI_KEY в .env"
         try:
             response = requests.get(
                 f"https://newsapi.org/v2/top-headlines?"
@@ -36,11 +45,10 @@ class InfoCommands:
                 f"apiKey={self.news_api_key}&"
                 f"language=ru"
             )
-
-            if response.status_code != 200:
-                return "Ошибка при получении новостей"
-
             data = response.json()
+            if response.status_code != 200:
+                msg = data.get("message", "неизвестная ошибка")
+                return f"Ошибка новостей ({response.status_code}): {msg}"
 
             if not data.get('articles'):
                 return "Новости не найдены"
@@ -55,10 +63,10 @@ class InfoCommands:
 
             self.cache.set("news", news_list)
             return news_list
-        except requests.exceptions.RequestException:
-            return "Произошла ошибка при загрузке новостей"
+        except requests.exceptions.RequestException as e:
+            return f"Ошибка сети при запросе новостей: {e}"
         except Exception as e:
-            return f"Не удалось получить новости: {str(e)}"
+            return f"Не удалось получить новости: {e}"
 
     def search(self, command):
         try:
