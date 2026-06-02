@@ -32,5 +32,13 @@ class TextToSpeech:
     def set_rate(self, value):
         self.engine.setProperty("rate", max(50, min(400, int(value))))
 
+    def get_voices(self):
+        return self.engine.getProperty("voices")
+
+    def set_voice(self, index):
+        voices = self.get_voices()
+        if 0 <= index < len(voices):
+            self.engine.setProperty("voice", voices[index].id)
+
     def stop(self):
         self.engine.stop()
