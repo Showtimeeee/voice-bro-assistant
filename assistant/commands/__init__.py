@@ -11,7 +11,7 @@ from .general import GeneralCommands
 from .info import InfoCommands
 from .storage import StorageCommands
 from .tools import ToolCommands
-from .settings import SettingsCommands, _load_speed
+from .settings import SettingsCommands, _load_speed, _load_voice
 
 
 class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolCommands, SettingsCommands):
@@ -27,8 +27,10 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
         self.cache = Cache(FILE_PATHS['cache_dir'])
 
         if self.tts:
-            saved = _load_speed()
-            self.tts.set_rate(saved)
+            self.tts.set_rate(_load_speed())
+            voice_idx = _load_voice()
+            if voice_idx is not None:
+                self.tts.set_voice(voice_idx)
 
         self.commands = {
             'greeting': self.handle_greeting,
@@ -46,6 +48,7 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
             'stop_music': self.stop_music,
             'search': self.search,
             'speed': self.set_speed,
+            'voice': self.set_voice,
             'how_are_you': self.handle_how_are_you,
             'help': self.show_help,
         }
@@ -66,6 +69,7 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
             'stop_music': ['выключи музыку', 'останови музыку'],
             'search': ['поиск', 'найди'],
             'speed': ['говори быстрее', 'говори медленнее', 'нормальная скорость', 'увеличь скорость', 'уменьши скорость', 'скорость речи'],
+            'voice': ['голос мужской', 'голос женский'],
             'how_are_you': ['как дела', 'как поживаешь'],
             'help': ['помощь', 'что умеешь'],
         }
