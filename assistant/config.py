@@ -2,10 +2,9 @@ import os
 from dotenv import load_dotenv
 
 
-load_dotenv(os.path.join(BASE_DIR, '.env'))
-
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 VOSK_MODEL_PATH = os.path.join(
     BASE_DIR, 
     os.getenv('VOSK_MODEL_DIR', 'vosk-model-small-ru-0.22'))
@@ -31,27 +30,6 @@ SETTINGS = {
 FILE_PATHS = {
     'notes': os.path.join(BASE_DIR, os.getenv('NOTES_FILE', 'notes.txt')),
     'reminders': os.path.join(BASE_DIR, os.getenv('REMINDERS_FILE', 'reminders.txt')),
-    'vosk_model': VOSK_MODEL_PATH
-}
-
-# Настройки БД
-DATABASE = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': int(os.getenv('DB_PORT', 5432)),
-    'user': os.getenv('DB_USER', 'your_user'),
-    'password': os.getenv('DB_PASSWORD', 'your_password'),
-    'database': os.getenv('DB_NAME', 'your_database')
-}
-
-# Логирование
-LOGGING = {
-    'log_file': os.getenv('LOG_FILE', 'app.log'),
-    'level': os.getenv('LOG_LEVEL', 'INFO')
-}
-
-# Уведомления
-NOTIFICATIONS = {
-    'enabled': os.getenv('NOTIFICATIONS_ENABLED', 'True').lower() in ['true', '1', 'yes'],
-    'method': os.getenv('NOTIFICATION_METHOD', 'email'),
-    'email': os.getenv('NOTIFICATION_EMAIL', 'your@email.com')
+    'vosk_model': VOSK_MODEL_PATH,
+    'cache_dir': os.path.join(BASE_DIR, os.getenv('CACHE_DIR', 'cache_data')),
 }
