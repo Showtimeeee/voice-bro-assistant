@@ -148,6 +148,38 @@ def test_speed_no_tts(processor):
     result = processor.process("говори быстрее")
     assert "Ошибка" in result
 
+def test_weather_no_key(processor):
+    processor.weather_api_key = None
+    result = processor.process("погода")
+    assert "не настроен" in result
+
+def test_weather_api_error(processor, mocker):
+    mock_resp = mocker.Mock()
+    mock_resp.status_code = 401
+    mock_resp.json.return_value = {"message": "Invalid API key"}
+    mocker.patch("requests.get", return_value=mock_resp)
+    result = processor.process("погода")
+    assert "Ошибка погоды" in result
+    assert "401" in result
+    assert "Invalid API key" in result
+
+def test_news_no_key(processor):
+    processor.news_api_key = None
+    result = processor.process("новости")
+    assert "не настроен" in result
+
+def test_news_api_error(processor, mocker):
+    mock_resp = mocker.Mock()
+    mock_resp.status_code = 401
+    mock_resp.json.return_value = {"message": "API key invalid"}
+    mocker.patch("requests.get", return_value=mock_resp)
+    result = processor.process("новости")
+    assert "Ошибка новостей" in result
+    assert "401" in result
+    processor.tts = None
+    result = processor.process("говори быстрее")
+    assert "Ошибка" in result
+
 
 def test_unknown_command(processor):
     result = processor.process("фывапролд")
