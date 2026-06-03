@@ -186,6 +186,28 @@ def test_unknown_command(processor):
     assert "Не совсем поняла" in result
 
 
+def test_voice_male(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_voices.return_value = [mocker.Mock(), mocker.Mock()]
+    processor.tts = mock_tts
+    result = processor.process("голос мужской")
+    assert "изменён" in result
+    mock_tts.set_voice.assert_called_with(0)
+
+def test_voice_female(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_voices.return_value = [mocker.Mock(), mocker.Mock()]
+    processor.tts = mock_tts
+    result = processor.process("голос женский")
+    assert "изменён" in result
+    mock_tts.set_voice.assert_called_with(1)
+
+def test_voice_no_tts(processor):
+    processor.tts = None
+    result = processor.process("голос мужской")
+    assert "Ошибка" in result
+
+
 def test_empty_command(processor):
     result = processor.process("")
     assert "Не совсем поняла" in result
