@@ -1,4 +1,6 @@
+import os
 import time
+import shutil
 from assistant.log import setup_logging, logger
 from assistant.tts import TextToSpeech
 from assistant.stt import SpeechToText
@@ -7,6 +9,28 @@ from assistant.vad import VoiceActivityDetector
 
 
 _VAD_FRAME = None
+
+def _check_dependencies():
+    warnings = []
+
+    from assistant.config import VOSK_MODEL_PATH, API_KEYS
+    if not os.path.isdir(VOSK_MODEL_PATH):
+        warnings.append(
+            f"Vosk-модель не найдена: {VOSK_MODEL_PATH}"
+        )
+
+    if not shutil.which("ffplay"):
+        warnings.append("ffplay не найден. Музыка не будет работать.")
+
+    if not API_KEYS["weather"]:
+        warnings.append(
+            "OPENWEATHERMAP_KEY не задан. Погода недоступна."
+        )
+    if not API_KEYS["news"]:
+        warnings.append("NEWSAPI_KEY не задан. Новости недоступны.")
+
+    return warnings
+
 
 def _get_vad_frame(rate: int) -> int:
     global _VAD_FRAME
@@ -42,11 +66,16 @@ def main():
     setup_logging()
     logger.info("Голосовой помощник запущен")
 
+    for w in _check_dependencies():
+        logger.warning(w)
+        print(f"  ⚠ {w}")
+
     tts = TextToSpeech()
     stt = SpeechToText()
     vad = VoiceActivityDetector()
     commands = CommandProcessor(
-        reminder_callback=lambda text: tts.speak(f"Напоминание: {text}")
+        reminder_callback=lambda text: tts.speak(f"Напоминание: {text}"),
+        tts=tts,
     )
 
     print("Скажите 'бро' для активации.")
