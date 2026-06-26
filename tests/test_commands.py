@@ -230,6 +230,15 @@ def test_volume_no_tts(processor):
     result = processor.process("громче")
     assert "Ошибка" in result
 
+def test_repeat_last(processor):
+    processor.process("привет")
+    result = processor.process("повтори")
+    assert result == processor._last_response
+
+def test_repeat_empty(processor):
+    result = processor.process("повтори")
+    assert "ещё ничего" in result
+
 def test_voice_no_tts(processor):
     processor.tts = None
     result = processor.process("голос мужской")
