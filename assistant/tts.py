@@ -40,5 +40,11 @@ class TextToSpeech:
         if 0 <= index < len(voices):
             self.engine.setProperty("voice", voices[index].id)
 
+    def get_volume(self):
+        return self.engine.getProperty("volume")
+
+    def set_volume(self, value):
+        self.engine.setProperty("volume", max(0.0, min(1.0, float(value))))
+
     def stop(self):
         self.engine.stop()
