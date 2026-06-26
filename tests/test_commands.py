@@ -202,6 +202,34 @@ def test_voice_female(processor, mocker):
     assert "изменён" in result
     mock_tts.set_voice.assert_called_with(1)
 
+def test_volume_louder(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_volume.return_value = 0.5
+    processor.tts = mock_tts
+    result = processor.process("громче")
+    assert "Громкость: 60%" in result
+    mock_tts.set_volume.assert_called_with(0.6)
+
+def test_volume_quieter(processor, mocker):
+    mock_tts = mocker.Mock()
+    mock_tts.get_volume.return_value = 0.5
+    processor.tts = mock_tts
+    result = processor.process("тише")
+    assert "Громкость: 40%" in result
+    mock_tts.set_volume.assert_called_with(0.4)
+
+def test_volume_set_number(processor, mocker):
+    mock_tts = mocker.Mock()
+    processor.tts = mock_tts
+    result = processor.process("громкость 80")
+    assert "Громкость: 80%" in result
+    mock_tts.set_volume.assert_called_with(0.8)
+
+def test_volume_no_tts(processor):
+    processor.tts = None
+    result = processor.process("громче")
+    assert "Ошибка" in result
+
 def test_voice_no_tts(processor):
     processor.tts = None
     result = processor.process("голос мужской")
