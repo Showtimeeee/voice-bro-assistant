@@ -42,3 +42,8 @@ class GeneralCommands:
     def handle_how_are_you(self, command):
         replies = ["Всё отлично!", "Работаю в штатном режиме", "Лучше всех, спасибо!"]
         return random.choice(replies)
+
+    def handle_repeat(self, command):
+        if self._last_response:
+            return self._last_response
+        return "Я ещё ничего не говорила."
