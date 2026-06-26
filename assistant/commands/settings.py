@@ -32,6 +32,10 @@ def _load_voice():
     return _load_settings().get("voice_index", None)
 
 
+def _load_volume():
+    return _load_settings().get("volume", 1.0)
+
+
 class SettingsCommands:
     def set_speed(self, command):
         if not self.tts:
@@ -67,3 +71,20 @@ class SettingsCommands:
             _save_setting("voice_index", target)
             return "Голос изменён."
         return "Доступен только один голос."
+
+    def set_volume(self, command):
+        if not self.tts:
+            return "Ошибка: голосовой движок не инициализирован."
+        if "громче" in command:
+            vol = min(1.0, self.tts.get_volume() + 0.1)
+        elif "тише" in command:
+            vol = max(0.0, self.tts.get_volume() - 0.1)
+        else:
+            match = re.search(r"(\d+)", command)
+            if match:
+                vol = max(0.0, min(1.0, int(match.group(1)) / 100))
+            else:
+                return "Не поняла, какую громкость установить."
+        self.tts.set_volume(vol)
+        _save_setting("volume", vol)
+        return f"Громкость: {int(vol * 100)}%"
