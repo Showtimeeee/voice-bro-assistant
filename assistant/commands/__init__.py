@@ -14,11 +14,13 @@ from .storage import StorageCommands
 from .tools import ToolCommands
 from .settings import SettingsCommands, _load_speed, _load_voice, _load_volume
 from .timer_cmd import TimerCommands
+from .system_cmd import SystemCommands
 
 
 class CommandProcessor(
     GeneralCommands, InfoCommands, StorageCommands,
     ToolCommands, SettingsCommands, TimerCommands,
+    SystemCommands,
 ):
     def __init__(self, reminder_callback=None, timer_callback=None, tts=None):
         self.tts = tts
@@ -48,6 +50,7 @@ class CommandProcessor(
             'time': self.get_time,
             'reminder': self.set_reminder,
             'note': self.add_note,
+            'open_app': self.open_app,
             'show_notes': self.show_notes,
             'calculate': self.calculate,
             'joke': self.tell_joke,
@@ -61,6 +64,10 @@ class CommandProcessor(
             'repeat': self.handle_repeat,
             'timer_start': self.start_timer,
             'timer_check': self.check_timer,
+            'shutdown': self.shutdown_pc,
+            'cancel_shutdown': self.cancel_shutdown,
+            'restart': self.restart_pc,
+            'lock': self.lock_pc,
             'how_are_you': self.handle_how_are_you,
             'help': self.show_help,
         }
@@ -73,6 +80,7 @@ class CommandProcessor(
             'time': ['время', 'который час'],
             'reminder': ['напомни'],
             'note': ['заметка', 'запиши'],
+            'open_app': ['открой'],
             'show_notes': ['покажи заметки', 'мои заметки'],
             'calculate': ['калькулятор', 'посчитай', 'посчитать'],
             'joke': ['шутка', 'анекдот'],
@@ -86,6 +94,10 @@ class CommandProcessor(
             'repeat': ['повтори'],
             'timer_start': ['таймер на', 'засеки'],
             'timer_check': ['сколько осталось'],
+            'shutdown': ['выключи компьютер'],
+            'cancel_shutdown': ['отмени выключение'],
+            'restart': ['перезагрузи'],
+            'lock': ['заблокируй'],
             'how_are_you': ['как дела', 'как поживаешь'],
             'help': ['помощь', 'что умеешь'],
         }
