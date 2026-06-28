@@ -5,6 +5,7 @@ from ..log import logger
 from ..notes import NotesManager
 from ..translator import OfflineTranslator
 from ..reminder import ReminderService
+from ..timer import TimerService
 from ..music import MusicPlayer
 from ..cache import Cache
 from .general import GeneralCommands
@@ -12,16 +13,21 @@ from .info import InfoCommands
 from .storage import StorageCommands
 from .tools import ToolCommands
 from .settings import SettingsCommands, _load_speed, _load_voice, _load_volume
+from .timer_cmd import TimerCommands
 
 
-class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolCommands, SettingsCommands):
-    def __init__(self, reminder_callback=None, tts=None):
+class CommandProcessor(
+    GeneralCommands, InfoCommands, StorageCommands,
+    ToolCommands, SettingsCommands, TimerCommands,
+):
+    def __init__(self, reminder_callback=None, timer_callback=None, tts=None):
         self.tts = tts
         self.weather_api_key = API_KEYS['weather']
         self.news_api_key = API_KEYS['news']
         self.timezone = pytz.timezone('Europe/Moscow')
         self.notes = NotesManager()
         self.reminders = ReminderService(callback=reminder_callback)
+        self.timer_service = TimerService(callback=timer_callback)
         self.translator = OfflineTranslator()
         self.music_player = MusicPlayer()
         self.cache = Cache(FILE_PATHS['cache_dir'])
@@ -53,6 +59,8 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
             'voice': self.set_voice,
             'volume': self.set_volume,
             'repeat': self.handle_repeat,
+            'timer_start': self.start_timer,
+            'timer_check': self.check_timer,
             'how_are_you': self.handle_how_are_you,
             'help': self.show_help,
         }
@@ -75,7 +83,9 @@ class CommandProcessor(GeneralCommands, InfoCommands, StorageCommands, ToolComma
             'speed': ['говори быстрее', 'говори медленнее', 'нормальная скорость', 'увеличь скорость', 'уменьши скорость', 'скорость речи'],
             'voice': ['голос мужской', 'голос женский'],
             'volume': ['громче', 'тише', 'громкость'],
-            'repeat': ['повтори', 'что ты сказала', 'ещё раз'],
+            'repeat': ['повтори'],
+            'timer_start': ['таймер на', 'засеки'],
+            'timer_check': ['сколько осталось'],
             'how_are_you': ['как дела', 'как поживаешь'],
             'help': ['помощь', 'что умеешь'],
         }
