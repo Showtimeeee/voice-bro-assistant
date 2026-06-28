@@ -245,6 +245,96 @@ def test_voice_no_tts(processor):
     assert "Ошибка" in result
 
 
+def test_timer_start(processor):
+    result = processor.process("таймер на 10 минут")
+    assert "запущен" in result
+    assert "10 мин" in result
+
+def test_timer_start_zaseki(processor):
+    result = processor.process("засеки 5 минут")
+    assert "запущен" in result
+
+def test_timer_check_active(processor):
+    processor.process("таймер на 30 минут")
+    result = processor.process("сколько осталось")
+    assert "осталось" in result
+    assert "Таймер" in result
+
+def test_timer_check_none(processor):
+    result = processor.process("сколько осталось")
+    assert "активных таймеров" in result
+
+def test_timer_no_duration(processor):
+    result = processor.process("таймер на")
+    assert "Не поняла" in result
+
+def test_timer_zaseki_no_duration(processor):
+    result = processor.process("засеки")
+    assert "Не поняла" in result
+
+
+def test_open_browser(processor, mocker):
+    mocker.patch("webbrowser.open")
+    result = processor.process("открой браузер")
+    assert "Открываю" in result
+
+def test_open_calculator(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("открой калькулятор")
+    assert "Открываю" in result
+    mock_popen.assert_called()
+
+def test_open_unknown(processor):
+    result = processor.process("открой фотошоп")
+    assert "Что открыть" in result
+
+def test_shutdown(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("выключи компьютер")
+    assert "выключится" in result
+    mock_popen.assert_called_once_with(
+        ["shutdown", "/s", "/t", "30"], shell=False
+    )
+
+def test_shutdown_timed(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("выключи компьютер через 10 минут")
+    assert "выключится" in result
+    mock_popen.assert_called_once_with(
+        ["shutdown", "/s", "/t", "600"], shell=False
+    )
+
+def test_cancel_shutdown(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("отмени выключение")
+    assert "отменено" in result
+    mock_popen.assert_called_once_with(["shutdown", "/a"], shell=False)
+
+def test_restart(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("перезагрузи компьютер")
+    assert "перезагрузится" in result
+    mock_popen.assert_called_once_with(
+        ["shutdown", "/r", "/t", "30"], shell=False
+    )
+
+def test_restart_timed(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("перезагрузи через 5 минут")
+    assert "перезагрузится" in result
+    mock_popen.assert_called_once_with(
+        ["shutdown", "/r", "/t", "300"], shell=False
+    )
+
+def test_lock(processor, mocker):
+    mock_popen = mocker.patch("subprocess.Popen")
+    result = processor.process("заблокируй компьютер")
+    assert "заблокирован" in result
+    mock_popen.assert_called_once_with(
+        ["rundll32.exe", "user32.dll,LockWorkStation"], shell=False
+    )
+
+
 def test_empty_command(processor):
     result = processor.process("")
     assert "Не совсем поняла" in result
