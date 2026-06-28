@@ -64,8 +64,11 @@ def _voice_loop(commands):
     stt = SpeechToText()
     vad = VoiceActivityDetector()
 
-    commands.reminders.start()
     commands.tts = tts
+    commands.reminders.callback = lambda text: tts.speak(f"Напоминание: {text}")
+    commands.timer_service.callback = lambda text: tts.speak(f"Таймер: {text}")
+    commands.reminders.start()
+    commands.timer_service.start()
 
     print("Скажите 'бро' для активации.")
 
@@ -94,11 +97,15 @@ def _voice_loop(commands):
                     break
     finally:
         commands.reminders.stop()
+        commands.timer_service.stop()
         stt.close()
 
 
 def _text_loop(commands):
+    commands.reminders.callback = lambda text: print(f"⏰ Напоминание: {text}")
+    commands.timer_service.callback = lambda text: print(f"⏱ Таймер: {text}")
     commands.reminders.start()
+    commands.timer_service.start()
     print("Текстовый режим. Введите 'пока' для выхода.")
     print()
 
@@ -115,6 +122,7 @@ def _text_loop(commands):
             print(response)
     finally:
         commands.reminders.stop()
+        commands.timer_service.stop()
 
 
 def _get_vad_frame(rate: int) -> int:
@@ -141,7 +149,8 @@ def main():
         print(f"  ⚠ {w}")
 
     commands = CommandProcessor(
-        reminder_callback=lambda text: print(f"⏰ {text}"),
+        reminder_callback=None,
+        timer_callback=None,
         tts=None,
     )
 
