@@ -15,6 +15,12 @@ class StorageCommands:
         except Exception as e:
             return f"Произошла ошибка при отображении заметок: {str(e)}"
 
+    def notes_count(self, command):
+        try:
+            return self.notes.count_notes()
+        except Exception as e:
+            return f"Произошла ошибка: {str(e)}"
+
     def delete_note(self, command):
         try:
             words = command.split()
@@ -30,17 +36,22 @@ class StorageCommands:
 
     def set_reminder(self, command):
         try:
-            text = command.replace("напомни", "").strip()
-            if not text:
-                return "Пожалуйста, укажите текст напоминания"
-            self.reminders.add_reminder(text)
-            return f"Напоминание установлено: {text}"
+            dt, text = self.reminders.parse(command)
+            if text is None:
+                return "Что напомнить?"
+
+            if dt:
+                self.reminders.add(text, dt)
+                return f"Напоминание установлено на {dt.strftime('%d.%m %H:%M')}: {text}"
+            else:
+                self.reminders.add(text)
+                return f"Напоминание сохранено: {text}"
         except Exception as e:
-            return f"Произошла ошибка при установке напоминания: {str(e)}"
+            return f"Произошла ошибка: {str(e)}"
 
     def show_reminders(self, command):
         try:
-            return self.reminders.show_reminders()
+            return self.reminders.show_all()
         except Exception as e:
             return f"Произошла ошибка при отображении напоминаний: {str(e)}"
 
@@ -50,7 +61,7 @@ class StorageCommands:
             if 'удалить' in words:
                 try:
                     reminder_number = int(words[-1])
-                    return self.reminders.delete_reminder(reminder_number)
+                    return self.reminders.delete(reminder_number)
                 except:
                     pass
             return "Не указан номер напоминания для удаления"
