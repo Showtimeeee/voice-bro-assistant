@@ -1,11 +1,12 @@
 import os
-from assistant.notes import NotesManager, ReminderManager
-from assistant import config
+from assistant.notes import NotesManager
+from assistant.reminder import ReminderService
+from assistant.config import FILE_PATHS
 
 
 class TestNotesManager:
     def setup_method(self):
-        self.path = config.FILE_PATHS['notes']
+        self.path = FILE_PATHS['notes']
         if os.path.exists(self.path):
             os.remove(self.path)
         self.mgr = NotesManager()
@@ -45,33 +46,52 @@ class TestNotesManager:
         result = self.mgr.add_note("")
         assert "Не указан" in result
 
+    def test_count_zero(self):
+        assert self.mgr.count_notes() == "У вас нет заметок"
 
-class TestReminderManager:
+    def test_count_one(self):
+        self.mgr.add_note("одна заметка")
+        assert self.mgr.count_notes() == "У вас 1 заметка"
+
+    def test_count_many(self):
+        self.mgr.add_note("заметка 1")
+        self.mgr.add_note("заметка 2")
+        self.mgr.add_note("заметка 3")
+        assert self.mgr.count_notes() == "У вас 3 заметок"
+
+
+class TestReminderService:
     def setup_method(self):
-        self.path = config.FILE_PATHS['reminders']
+        self.path = FILE_PATHS['reminders']
         if os.path.exists(self.path):
             os.remove(self.path)
-        self.mgr = ReminderManager()
+        self.svc = ReminderService()
 
-    def test_empty_reminders(self):
-        assert self.mgr.show_reminders() == "Напоминаний нет"
+    def test_empty(self):
+        assert self.svc.show_all() == "Напоминаний нет"
 
-    def test_add_reminder(self):
-        result = self.mgr.add_reminder("позвонить")
-        assert result == "Напоминание добавлено"
+    def test_add_simple(self):
+        self.svc.add("позвонить")
+        result = self.svc.show_all()
+        assert "позвонить" in result
 
-    def test_show_reminders(self):
-        self.mgr.add_reminder("напоминание 1")
-        result = self.mgr.show_reminders()
-        assert "напоминание 1" in result
+    def test_delete(self):
+        self.svc.add("удалить")
+        result = self.svc.delete(1)
+        assert "удалено" in result
+        assert self.svc.show_all() == "Напоминаний нет"
 
-    def test_delete_reminder(self):
-        self.mgr.add_reminder("удалить")
-        self.mgr.delete_reminder(1)
-        assert self.mgr.show_reminders() == "Напоминаний нет"
+    def test_delete_invalid_index(self):
+        self.svc.add("тест")
+        result = self.svc.delete(99)
+        assert "Неверный номер" in result
 
-    def test_persistence(self):
-        self.mgr.add_reminder("сохранённое")
-        mgr2 = ReminderManager()
-        result = mgr2.show_reminders()
-        assert "сохранённое" in result
+    def test_parse_with_time(self):
+        dt, text = self.svc.parse("напомни через 10 минут выключить чайник")
+        assert text is not None
+        assert dt is not None
+
+    def test_parse_without_time(self):
+        dt, text = self.svc.parse("напомни позвонить")
+        assert text == "позвонить"
+        assert dt is None
