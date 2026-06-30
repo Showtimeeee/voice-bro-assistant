@@ -14,6 +14,14 @@ class NotesManager:
         self.save_notes()
         return "Заметка добавлена"
 
+    def count_notes(self):
+        count = len(self.notes)
+        if count == 0:
+            return "У вас нет заметок"
+        if count == 1:
+            return "У вас 1 заметка"
+        return f"У вас {count} заметок"
+
     def show_notes(self):
         if not self.notes:
             return "Заметок нет"
@@ -48,52 +56,3 @@ class NotesManager:
                     self.notes = [line.strip() for line in f.readlines()]
         except Exception as e:
             print(f"Ошибка загрузки заметок: {e}")
-
-
-# reminders.py
-class ReminderManager:
-    def __init__(self):
-        self.reminders = []
-        self.load_reminders()
-
-    def add_reminder(self, text):
-        if not text:
-            return "Не указан текст напоминания"
-        self.reminders.append(text)
-        self.save_reminders()
-        return "Напоминание добавлено"
-
-    def show_reminders(self):
-        if not self.reminders:
-            return "Напоминаний нет"
-        reminders_list = "\n".join([f"{i+1}. {reminder}" for i, reminder in enumerate(self.reminders)])
-        return f"Ваши напоминания:\n{reminders_list}"
-
-    def delete_reminder(self, index):
-        try:
-            index = int(index) - 1
-            if 0 <= index < len(self.reminders):
-                removed_reminder = self.reminders.pop(index)
-                self.save_reminders()
-                return f"Напоминание удалено: {removed_reminder}"
-            return "Неверный номер напоминания"
-        except:
-            return "Ошибка при удалении напоминания"
-
-    def save_reminders(self):
-        try:
-            path = config.FILE_PATHS['reminders']
-            with open(path, 'w', encoding='utf-8') as f:
-                for reminder in self.reminders:
-                    f.write(reminder + '\n')
-        except Exception as e:
-            print(f"Ошибка сохранения напоминаний: {e}")
-
-    def load_reminders(self):
-        try:
-            path = config.FILE_PATHS['reminders']
-            if os.path.exists(path):
-                with open(path, 'r', encoding='utf-8') as f:
-                    self.reminders = [line.strip() for line in f.readlines()]
-        except Exception as e:
-            print(f"Ошибка загрузки напоминаний: {e}")
